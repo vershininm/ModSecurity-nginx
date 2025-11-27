@@ -22,9 +22,6 @@
 #include <ngx_core.h>
 #include <ngx_http.h>
 
-#include <modsecurity/modsecurity.h>
-#include <modsecurity/transaction.h>
-
 
 /* #define MSC_USE_RULES_SET 1 */
 
@@ -32,12 +29,6 @@
 #if MODSECURITY_VERSION_NUM >= 304010
 #define MSC_USE_RULES_SET 1
 #endif
-#endif
-
-#if defined(MSC_USE_RULES_SET)
-#include <modsecurity/rules_set.h>
-#else
-#include <modsecurity/rules.h>
 #endif
 
 
@@ -71,16 +62,17 @@
 #define MODSECURITY_NGINX_WHOAMI "ModSecurity-nginx v" \
     MODSECURITY_NGINX_VERSION
 
+#include <coraza/coraza.h>
+
 typedef struct {
     ngx_str_t name;
     ngx_str_t value;
 } ngx_http_modsecurity_header_t;
 
-
 typedef struct {
     ngx_http_request_t *r;
-    Transaction *modsec_transaction;
-    ModSecurityIntervention *delayed_intervention;
+    coraza_transaction_t modsec_transaction;
+    coraza_intervention_t *delayed_intervention;
 
 #if defined(MODSECURITY_SANITY_CHECKS) && (MODSECURITY_SANITY_CHECKS)
     /*
@@ -105,7 +97,7 @@ typedef struct {
 
 typedef struct {
     void                      *pool;
-    ModSecurity               *modsec;
+    coraza_waf_t               modsec;
     ngx_uint_t                 rules_inline;
     ngx_uint_t                 rules_file;
     ngx_uint_t                 rules_remote;
@@ -115,7 +107,6 @@ typedef struct {
 typedef struct {
     void                      *pool;
     /* RulesSet or Rules */
-    void                      *rules_set;
 
     ngx_flag_t                 enable;
 #if defined(MODSECURITY_SANITY_CHECKS) && (MODSECURITY_SANITY_CHECKS)
@@ -138,7 +129,7 @@ typedef struct {
 extern ngx_module_t ngx_http_modsecurity_module;
 
 /* ngx_http_modsecurity_module.c */
-int ngx_http_modsecurity_process_intervention (Transaction *transaction, ngx_http_request_t *r, ngx_int_t early_log);
+int ngx_http_modsecurity_process_intervention (coraza_transaction_t transaction, ngx_http_request_t *r, ngx_int_t early_log);
 ngx_http_modsecurity_ctx_t *ngx_http_modsecurity_create_ctx(ngx_http_request_t *r);
 ngx_http_modsecurity_ctx_t *ngx_http_modsecurity_get_module_ctx(ngx_http_request_t *r);
 char *ngx_str_to_char(ngx_str_t a, ngx_pool_t *p);

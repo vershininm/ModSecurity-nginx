@@ -18,6 +18,8 @@
 #ifndef MODSECURITY_DDEBUG
 #define MODSECURITY_DDEBUG 0
 #endif
+#include <coraza/coraza.h>
+
 #include "ddebug.h"
 
 #include "ngx_http_modsecurity_common.h"
@@ -172,7 +174,7 @@ ngx_http_modsecurity_resolv_header_server(ngx_http_request_t *r, ngx_str_t name,
     ngx_http_modsecurity_store_ctx_header(r, &name, &value);
 #endif
 
-    return msc_add_n_response_header(ctx->modsec_transaction,
+    return coraza_add_response_header(ctx->modsec_transaction,
         (const unsigned char *) name.data,
         name.len,
         (const unsigned char *) value.data,
@@ -201,7 +203,7 @@ ngx_http_modsecurity_resolv_header_date(ngx_http_request_t *r, ngx_str_t name, o
     ngx_http_modsecurity_store_ctx_header(r, &name, &date);
 #endif
 
-    return msc_add_n_response_header(ctx->modsec_transaction,
+    return coraza_add_response_header(ctx->modsec_transaction,
         (const unsigned char *) name.data,
         name.len,
         (const unsigned char *) date.data,
@@ -227,7 +229,7 @@ ngx_http_modsecurity_resolv_header_content_length(ngx_http_request_t *r, ngx_str
 #if defined(MODSECURITY_SANITY_CHECKS) && (MODSECURITY_SANITY_CHECKS)
         ngx_http_modsecurity_store_ctx_header(r, &name, &value);
 #endif
-        return msc_add_n_response_header(ctx->modsec_transaction,
+        return coraza_add_response_header(ctx->modsec_transaction,
             (const unsigned char *) name.data,
             name.len,
             (const unsigned char *) value.data,
@@ -252,7 +254,7 @@ ngx_http_modsecurity_resolv_header_content_type(ngx_http_request_t *r, ngx_str_t
         ngx_http_modsecurity_store_ctx_header(r, &name, &r->headers_out.content_type);
 #endif
 
-        return msc_add_n_response_header(ctx->modsec_transaction,
+        return coraza_add_response_header(ctx->modsec_transaction,
             (const unsigned char *) name.data,
             name.len,
             (const unsigned char *) r->headers_out.content_type.data,
@@ -285,7 +287,7 @@ ngx_http_modsecurity_resolv_header_last_modified(ngx_http_request_t *r, ngx_str_
     ngx_http_modsecurity_store_ctx_header(r, &name, &value);
 #endif
 
-    return msc_add_n_response_header(ctx->modsec_transaction,
+    return coraza_add_response_header(ctx->modsec_transaction,
         (const unsigned char *) name.data,
         name.len,
         (const unsigned char *) value.data,
@@ -321,7 +323,7 @@ ngx_http_modsecurity_resolv_header_connection(ngx_http_request_t *r, ngx_str_t n
             ngx_http_modsecurity_store_ctx_header(r, &name2, &value);
 #endif
 
-            msc_add_n_response_header(ctx->modsec_transaction,
+            coraza_add_response_header(ctx->modsec_transaction,
                 (const unsigned char *) name2.data,
                 name2.len,
                 (const unsigned char *) value.data,
@@ -338,7 +340,7 @@ ngx_http_modsecurity_resolv_header_connection(ngx_http_request_t *r, ngx_str_t n
     ngx_http_modsecurity_store_ctx_header(r, &name, &value);
 #endif
 
-    return msc_add_n_response_header(ctx->modsec_transaction,
+    return coraza_add_response_header(ctx->modsec_transaction,
         (const unsigned char *) name.data,
         name.len,
         (const unsigned char *) value.data,
@@ -359,7 +361,7 @@ ngx_http_modsecurity_resolv_header_transfer_encoding(ngx_http_request_t *r, ngx_
         ngx_http_modsecurity_store_ctx_header(r, &name, &value);
 #endif
 
-        return msc_add_n_response_header(ctx->modsec_transaction,
+        return coraza_add_response_header(ctx->modsec_transaction,
             (const unsigned char *) name.data,
             name.len,
             (const unsigned char *) value.data,
@@ -386,7 +388,7 @@ ngx_http_modsecurity_resolv_header_vary(ngx_http_request_t *r, ngx_str_t name, o
         ngx_http_modsecurity_store_ctx_header(r, &name, &value);
 #endif
 
-        return msc_add_n_response_header(ctx->modsec_transaction,
+        return coraza_add_response_header(ctx->modsec_transaction,
             (const unsigned char *) name.data,
             name.len,
             (const unsigned char *) value.data,
@@ -500,7 +502,7 @@ ngx_http_modsecurity_header_filter(ngx_http_request_t *r)
         /*
          * Doing this ugly cast here, explanation on the request_header
          */
-        msc_add_n_response_header(ctx->modsec_transaction,
+        coraza_add_response_header(ctx->modsec_transaction,
             (const unsigned char *) data[i].key.data,
             data[i].key.len,
             (const unsigned char *) data[i].value.data,
@@ -526,7 +528,7 @@ ngx_http_modsecurity_header_filter(ngx_http_request_t *r)
 #endif
 
     old_pool = ngx_http_modsecurity_pcre_malloc_init(r->pool);
-    msc_process_response_headers(ctx->modsec_transaction, status, http_response_ver);
+    coraza_process_response_headers(ctx->modsec_transaction, status, http_response_ver);
     ngx_http_modsecurity_pcre_malloc_done(old_pool);
     ret = ngx_http_modsecurity_process_intervention(ctx->modsec_transaction, r, 0);
     if (r->error_page) {

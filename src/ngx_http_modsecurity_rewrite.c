@@ -18,6 +18,8 @@
 #ifndef MODSECURITY_DDEBUG
 #define MODSECURITY_DDEBUG 0
 #endif
+#include <coraza/coraza.h>
+
 #include "ddebug.h"
 
 #include "ngx_http_modsecurity_common.h"
@@ -139,7 +141,7 @@ ngx_http_modsecurity_rewrite_handler(ngx_http_request_t *r)
         }
 
         old_pool = ngx_http_modsecurity_pcre_malloc_init(r->pool);
-        ret = msc_process_connection(ctx->modsec_transaction,
+        ret = coraza_process_connection(ctx->modsec_transaction,
             client_addr, client_port,
             server_addr, server_port);
         ngx_http_modsecurity_pcre_malloc_done(old_pool);
@@ -201,7 +203,7 @@ ngx_http_modsecurity_rewrite_handler(ngx_http_request_t *r)
             return NGX_HTTP_INTERNAL_SERVER_ERROR;
         }
         old_pool = ngx_http_modsecurity_pcre_malloc_init(r->pool);
-        msc_process_uri(ctx->modsec_transaction, n_uri, n_method, http_version);
+        coraza_process_uri(ctx->modsec_transaction, n_uri, n_method, http_version);
         ngx_http_modsecurity_pcre_malloc_done(old_pool);
 
         dd("Processing intervention with the transaction information filled in (uri, method and version)");
@@ -238,7 +240,7 @@ ngx_http_modsecurity_rewrite_handler(ngx_http_request_t *r)
              */
 
             dd("Adding request header: %.*s with value %.*s", (int)data[i].key.len, data[i].key.data, (int) data[i].value.len, data[i].value.data);
-            msc_add_n_request_header(ctx->modsec_transaction,
+            coraza_add_request_header(ctx->modsec_transaction,
                 (const unsigned char *) data[i].key.data,
                 data[i].key.len,
                 (const unsigned char *) data[i].value.data,
@@ -251,7 +253,7 @@ ngx_http_modsecurity_rewrite_handler(ngx_http_request_t *r)
          */
 
         old_pool = ngx_http_modsecurity_pcre_malloc_init(r->pool);
-        msc_process_request_headers(ctx->modsec_transaction);
+        coraza_process_request_headers(ctx->modsec_transaction);
         ngx_http_modsecurity_pcre_malloc_done(old_pool);
         dd("Processing intervention with the request headers information filled in");
         ret = ngx_http_modsecurity_process_intervention(ctx->modsec_transaction, r, 1);

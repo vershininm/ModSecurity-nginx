@@ -18,6 +18,8 @@
 #ifndef MODSECURITY_DDEBUG
 #define MODSECURITY_DDEBUG 0
 #endif
+#include <coraza/coraza.h>
+
 #include "ddebug.h"
 
 #include "ngx_http_modsecurity_common.h"
@@ -174,7 +176,7 @@ ngx_http_modsecurity_pre_access_handler(ngx_http_request_t *r)
              */
             dd("request body inspection: file -- %s", file_name);
 
-            msc_request_body_from_file(ctx->modsec_transaction, file_name);
+            coraza_request_body_from_file(ctx->modsec_transaction, file_name);
 
             already_inspected = 1;
         } else {
@@ -185,7 +187,7 @@ ngx_http_modsecurity_pre_access_handler(ngx_http_request_t *r)
         {
             u_char *data = chain->buf->pos;
 
-            msc_append_request_body(ctx->modsec_transaction, data,
+            coraza_append_request_body(ctx->modsec_transaction, data,
                 chain->buf->last - data);
 
             if (chain->buf->last_buf) {
@@ -216,7 +218,7 @@ ngx_http_modsecurity_pre_access_handler(ngx_http_request_t *r)
 /* XXX: once more -- is body can be modified ?  content-length need to be adjusted ? */
 
         old_pool = ngx_http_modsecurity_pcre_malloc_init(r->pool);
-        msc_process_request_body(ctx->modsec_transaction);
+        coraza_process_request_body(ctx->modsec_transaction);
         ctx->request_body_processed = 1;
         ngx_http_modsecurity_pcre_malloc_done(old_pool);
 
